@@ -38,7 +38,6 @@ public class ApplicationMaster {
                     break;
                 case "stop":
                     jobManagerActorRef.tell("stop", ActorRef.noSender());
-
                     try {
                         TimeUnit.SECONDS.sleep(10);
                     }catch (Exception e) {}

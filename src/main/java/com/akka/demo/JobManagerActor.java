@@ -21,10 +21,8 @@ public class JobManagerActor extends AbstractActor {
     private volatile boolean isRunning = false;
 
     /**
-     *
      * Actor 创建时自动异步启动
-     *
-     * */
+     */
     @Override
     public void preStart() throws Exception {
         System.out.println("jobManager actor 启动");
@@ -58,17 +56,24 @@ public class JobManagerActor extends AbstractActor {
      */
     @Override
     public void postStop() throws Exception {
-        System.out.println("jobManager "+self() + " 关闭中...");
+        System.out.println("jobManager " + self() + " 关闭中...");
     }
 
+    /**
+     * Actor 重启前调用，用于清理崩溃的数据
+     */
     @Override
     public void preRestart(Throwable reason, Optional<Object> message) throws Exception {
-        System.out.println("Actor 重启前调用，用于清理崩溃的数据");
+        System.out.println("jobManager 重启开始...");
+
     }
 
+    /**
+     * Actor 重启后调用，用于崩溃后的初始化，默认调用 preStart
+     */
     @Override
     public void postRestart(Throwable reason) throws Exception {
-        System.out.println("Actor 重启后调用，用于崩溃后的初始化，默认调用 preStart");
+        System.out.println("jobManager 重启完成...");
     }
 
     /**
@@ -145,7 +150,8 @@ public class JobManagerActor extends AbstractActor {
                     stopTaskManagerActor();
                     try {
                         TimeUnit.SECONDS.sleep(5);
-                    }catch (Exception e) {}
+                    } catch (Exception e) {
+                    }
                     //关闭自己
                     getContext().stop(self());
                 })

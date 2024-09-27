@@ -4,6 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.Props;
 import com.akka.demo.request.TaskManagerRequest;
 
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +27,7 @@ public class TaskManagerActor extends AbstractActor {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true){
+                while (true) {
                     if (isRunning) sendHeartbeat();
                     try {
                         //5秒发一次
@@ -45,17 +46,29 @@ public class TaskManagerActor extends AbstractActor {
      */
     @Override
     public void postStop() throws Exception {
-        System.out.println("taskManager "+self() + " 关闭中...");
+        System.out.println("taskManager " + self() + " 关闭中...");
     }
 
 
     public void sendHeartbeat() {
-        System.out.println("taskManager "+self() + " 发送心跳数据.");
+        System.out.println("taskManager " + self() + " 发送心跳数据.");
         getContext().actorSelection(getSelf().path().parent())
                 .tell(new TaskManagerRequest("heartbeat", System.currentTimeMillis()), self());
 
     }
 
+    /**
+     * 重启前调用
+     */
+    @Override
+    public void preRestart(Throwable reason, Optional<Object> message) throws Exception {
+        System.out.println("taskManager 重启开始...");
+    }
+
+    @Override
+    public void postRestart(Throwable reason) throws Exception {
+        System.out.println("taskManager 重启完成...");
+    }
 
     static Props props() {
         return Props.create(TaskManagerActor.class, TaskManagerActor::new);
@@ -73,7 +86,10 @@ public class TaskManagerActor extends AbstractActor {
                     isRunning = false;
                     getContext().stop(self());
                 })
-                .matchEquals("fail", failMessage -> isRunning = false)
+                .matchEquals("fail", failMessage -> {
+                    isRunning = false;
+                    throw new RuntimeException("i am failed!");
+                })
                 .build();
     }
 }
